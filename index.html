@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P5 LOE 5A3 Dict 1</title>
+  <style>
+    /* Pale yellow background */
+    body {
+      background-color: #FFFDE7;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* Centered Title at top */
+    h1 {
+      color: #2C3E50;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.2rem;
+    }
+
+    /* Main Container */
+    .card {
+      background-color: #FFFFFF;
+      border-radius: 20px;
+      padding: 40px 30px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    /* Button Layout */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    /* Sky blue buttons with white fonts */
+    button {
+      background-color: #4FC3F7; /* Sky Blue */
+      color: #FFFFFF;           /* White text */
+      border: none;
+      padding: 14px 28px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 30px;
+      cursor: pointer;
+      width: 85%;
+      max-width: 320px;
+      box-shadow: 0 4px 10px rgba(79, 195, 247, 0.3);
+      transition: transform 0.1s, background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #29B6F6;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Main Play button in the center */
+    #play-btn {
+      font-size: 1.3rem;
+      padding: 18px 36px;
+      background-color: #03A9F4;
+    }
+
+    #play-btn:hover {
+      background-color: #0288D1;
+    }
+
+    /* Status indicator */
+    .status {
+      margin: 20px 0 10px 0;
+      font-size: 1rem;
+      color: #555;
+      font-style: italic;
+      min-height: 24px;
+    }
+
+    /* Self-check transcript area */
+    .transcript-box {
+      margin-top: 25px;
+      border-top: 2px dashed #E0E0E0;
+      padding-top: 20px;
+      text-align: left;
+    }
+
+    .toggle-btn {
+      background-color: transparent;
+      color: #0288D1;
+      border: 1px solid #0288D1;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      box-shadow: none;
+      width: auto;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .toggle-btn:hover {
+      background-color: #E1F5FE;
+      transform: none;
+    }
+
+    #transcript-text {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #FAFAFA;
+      border-radius: 10px;
+      border: 1px solid #EEEEEE;
+      line-height: 1.6;
+      color: #333;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>P5 LOE 5A3 Dict 1</h1>
+
+  <div class="card">
+    <div class="controls">
+      <!-- Main Play Button -->
+      <button id="play-btn" onclick="playAudio()">▶ Play</button>
+      <!-- Replay Button -->
+      <button onclick="replayAudio()">🔄 Replay</button>
+      <!-- Refresh New Paragraph Button -->
+      <button onclick="refreshParagraph()">🔀 Refresh a New Paragraph</button>
+    </div>
+
+    <div class="status" id="status">Click "Play" to start dictation.</div>
+
+    <!-- Self-check section for students -->
+    <div class="transcript-box">
+      <button class="toggle-btn" onclick="toggleTranscript()">Eye Check (Show/Hide Text)</button>
+      <div id="transcript-text"></div>
+    </div>
+  </div>
+
+  <script>
+    // Sentence pool broken into meaningful chunks with MAX 4 WORDS per chunk
+    const sentencePool = [
+     ["Brad had a", "special experience yesterday."],
+      ["He spent the day", "without the Internet."],
+      ["Read his recount", "and find out", "what happened."],
+      ["I used to take", "the bus to school."],
+      ["This year,", "my family moved", "nearer to my school,", "so I started", "to go to school", "on foot."],
+      ["Yesterday,", "I walked home", "from school as usual."],
+      ["I was listening", "to some music", "through my earphones."],
+      ["Mum was downloading", "a video on her", "smartphone when I", "walked in the door."],
+      ["We smiled and", "nodded at each other."],
+      ["In the past,", "we used to talk", "about how we", "spent the day."],
+      ["Why don't we", "talk any more?"],
+      ["We sat together", "for dinner."],
+      ["However,", "no one started eating", "because they were", "all busy."],
+      ["Mum was taking", "a photo of", "the food and", "uploading it", "to her blog."],
+      ["Dad was shopping", "online."],
+      ["There was a 'beep'", "sound and Grandma", "took out her phone", "to check her messages."],
+      ["I turned to Grandpa."],
+      ["I wanted to tell", "him about school,", "but he was surfing", "the Internet on", "his tablet."],
+      ["Mei-lin,", "where shall we meet", "for lunch tomorrow?"],
+      ["IDK ..."],
+      ["How about Delimeal?"],
+      ["IMO,", "it's very good."],
+      ["Lovely!"],
+      ["I'll book a table", "online then."],
+      ["Thanks!"],
+      ["BTW,", "let's go shopping", "after lunch."],
+      ["Sure!"],
+      ["Then something strange", "happened."],
+      ["Everyone looked up", "and stared at", "each other."],
+      ["The Wi-Fi was down."],
+      ["Dad tried to fix", "the router,", "but it did not", "work."],
+      ["We had nothing", "to do but", "to chat."],
+      ["Grandpa told us", "funny stories", "about the past."],
+      ["I found out", "that Mum used to", "hate doing homework", "when she was a", "child too!"],
+      ["After dinner,", "Dad took out", "a board game and", "we had a lot", "of fun."],
+      ["Mum and Dad", "used to play", "card games when", "they were young."],
+      ["Nowadays,", "children only play", "online or mobile games."],
+      ["My friends invited me", "to download games", "like 'Animal Puzzle'", "and 'Snap!',", "but I prefer", "face-to-face interactions", "with them."],
+      ["We promised to have", "an Internet-free night", "every weekend."],
+      ["I look forward to", "talking and playing", "with my family", "together next week!"]
+    ];
+
+    let currentParagraphSentences = [];
+    const synth = window.speechSynthesis;
+    let isPlaying = false;
+    let currentTimeout = null;
+
+    // Helper function to count words in a sentence array
+    function countSentenceWords(sentence) {
+      return sentence.join(" ").trim().split(/\s+/).length;
+    }
+
+    // Convert punctuation marks to spoken words (ignoring apostrophes and hyphens)
+    function getSpokenText(text) {
+      return text
+        .replace(/,/g, " comma")
+        .replace(/\./g, " full stop")
+        .replace(/\?/g, " question mark")
+        .replace(/!/g, " exclamation mark")
+        .replace(/:/g, " colon")
+        .replace(/;/g, " semicolon");
+    }
+
+    // Generate a random paragraph of ~100 words
+    function generateParagraph() {
+      let shuffled = [...sentencePool].sort(() => 0.5 - Math.random());
+      let selectedSentences = [];
+      let totalWords = 0;
+
+      for (let sentence of shuffled) {
+        let wordCount = countSentenceWords(sentence);
+        if (totalWords + wordCount > 115) {
+          break;
+        }
+        selectedSentences.push(sentence);
+        totalWords += wordCount;
+        if (totalWords >= 85) {
+          break;
+        }
+      }
+
+      currentParagraphSentences = selectedSentences;
+
+      // Render full paragraph text for display
+      const fullText = currentParagraphSentences
+        .map(s => s.join(" "))
+        .join(" ");
+      
+      document.getElementById("transcript-text").innerText = fullText;
+    }
+
+    // Stop current speech and clear active timers
+    function stopSpeech() {
+      if (synth.speaking) {
+        synth.cancel();
+      }
+      if (currentTimeout) {
+        clearTimeout(currentTimeout);
+        currentTimeout = null;
+      }
+      isPlaying = false;
+    }
+
+    // Speak sequence with 1s chunk pause & 2s sentence pause
+    function speakSequence(sentences) {
+      stopSpeech();
+      if (!sentences || sentences.length === 0) return;
+
+      isPlaying = true;
+      document.getElementById("status").innerText = "🔊 Playing dictation...";
+
+      let queue = [];
+      sentences.forEach((sentence, sIdx) => {
+        const isLastSentence = (sIdx === sentences.length - 1);
+
+        sentence.forEach((chunk, cIdx) => {
+          const isLastChunk = (cIdx === sentence.length - 1);
+          
+          let pauseTime = 1000; // 1 second pause between chunks
+          if (isLastChunk) {
+            pauseTime = 2000; // 2 seconds pause between sentences
+          }
+          if (isLastSentence && isLastChunk) {
+            pauseTime = 0; // End of paragraph
+          }
+
+          queue.push({
+            originalText: chunk,
+            spokenText: getSpokenText(chunk),
+            delayAfter: pauseTime
+          });
+        });
+      });
+
+      let index = 0;
+
+      function speakNextItem() {
+        if (!isPlaying || index >= queue.length) {
+          isPlaying = false;
+          document.getElementById("status").innerText = "✅ Finished playing.";
+          return;
+        }
+
+        const currentItem = queue[index];
+        const utterance = new SpeechSynthesisUtterance(currentItem.spokenText);
+        utterance.rate = 0.7; // Dictation speed
+        utterance.lang = 'en-US';
+
+        utterance.onend = function() {
+          if (!isPlaying) return;
+          index++;
+          if (index < queue.length) {
+            currentTimeout = setTimeout(() => {
+              speakNextItem();
+            }, currentItem.delayAfter);
+          } else {
+            isPlaying = false;
+            document.getElementById("status").innerText = "✅ Finished playing.";
+          }
+        };
+
+        utterance.onerror = function() {
+          isPlaying = false;
+          document.getElementById("status").innerText = "⚠️ Audio playback error.";
+        };
+
+        synth.speak(utterance);
+      }
+
+      speakNextItem();
+    }
+
+    function playAudio() {
+      if (currentParagraphSentences.length === 0) {
+        generateParagraph();
+      }
+      speakSequence(currentParagraphSentences);
+    }
+
+    function replayAudio() {
+      if (currentParagraphSentences.length === 0) {
+        generateParagraph();
+      }
+      speakSequence(currentParagraphSentences);
+    }
+
+    function refreshParagraph() {
+      stopSpeech();
+      generateParagraph();
+      document.getElementById("status").innerText = "🔄 New paragraph generated. Click Play to listen!";
+    }
+
+    function toggleTranscript() {
+      const box = document.getElementById("transcript-text");
+      if (box.style.display === "block") {
+        box.style.display = "none";
+      } else {
+        if (currentParagraphSentences.length === 0) generateParagraph();
+        box.style.display = "block";
+      }
+    }
+
+    window.onload = function() {
+      generateParagraph();
+    };
+  </script>
+</body>
+</html>
